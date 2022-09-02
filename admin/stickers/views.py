@@ -6,6 +6,7 @@ from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Sticker, User
 
@@ -25,21 +26,30 @@ class StickerViewSet(viewsets.ViewSet):
         return Response(serializer.data, status.HTTP_201_CREATED)
 
     def retrieve(self, request, pk=None):
-        sticker = Sticker.objects.get(id=pk)
-        serializer = StickerSerializer(sticker)
-        return Response(serializer.data)
+        try:
+            sticker = Sticker.objects.get(id=pk)
+            serializer = StickerSerializer(sticker)
+            return Response(serializer.data)
+        except ObjectDoesNotExist:
+            return Response("Not Found", status.HTTP_404_NOT_FOUND)
 
     def update(self, request, pk=None):
-        sticker = Sticker.objects.get(id=pk)
-        serializer = StickerSerializer(instance=sticker, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status.HTTP_202_ACCEPTED)
+        try:
+            sticker = Sticker.objects.get(id=pk)
+            serializer = StickerSerializer(instance=sticker, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status.HTTP_202_ACCEPTED)
+        except ObjectDoesNotExist:
+            return Response("Not Found", status.HTTP_404_NOT_FOUND)
 
     def destroy(self, request, pk=None):
-        sticker = Sticker.objects.get(id=pk)
-        sticker.delete()
-        return Response(status.HTTP_204_NO_CONTENT)
+        try:
+            sticker = Sticker.objects.get(id=pk)
+            sticker.delete()
+            return Response("Deleted", status.HTTP_204_NO_CONTENT)
+        except ObjectDoesNotExist:
+            return Response("Not Found", status.HTTP_404_NOT_FOUND)
 
 
 class UserAPIView(APIView):

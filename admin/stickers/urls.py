@@ -25,6 +25,7 @@ urlpatterns = [
     path('sticker/<str:pk>', StickerViewSet.as_view({
         'get': 'retrieve',
         'put': 'update',
+        'patch': 'update',
         'delete': 'destroy',
     })),
     path('user', UserAPIView.as_view()),
